@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Crusher | Image Optimizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PIXEL CRUSHER</h1>
+            <p class="subtitle">Image Optimization Engine v1.0.0</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="grid">
+            <!-- INPUTS SECTION -->
+            <div class="card">
+                <h2>Entrada (Inputs)</h2>
+                
+                <form action="/upload" method="post" enctype="multipart/form-data" id="upload-form">
+                    <div class="upload-area" id="drop-zone">
+                        <p id="drop-text">Arrastra imágenes aquí o haz clic para buscar</p>
+                        <input type="file" name="files" id="file-input" multiple style="display: none;" onchange="this.form.submit()">
+                    </div>
+                </form>
+
+                <div class="file-list">
+                    {% if input_files %}
+                        {% for file in input_files %}
+                            <div class="file-item">
+                                <span>{{ file }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: #555; padding: 20px;">Carpeta vacía</p>
+                    {% endif %}
+                </div>
+
+                <form action="/clear" method="post">
+                    <input type="hidden" name="target" value="inputs">
+                    <button type="submit" class="btn btn-outline">Vaciado de Entradas</button>
+                </form>
+            </div>
+
+            <!-- CONTROLS SECTION -->
+            <div class="card">
+                <h2>Configuración</h2>
+                <form action="/crush" method="post">
+                    <div class="form-group">
+                        <label>Calidad WebP (1-100)</label>
+                        <input type="number" name="quality" value="80" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Reducción de Escala (Ej. 80 para 80%)</label>
+                        <input type="number" name="scale" placeholder="100" min="10" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Palabras Clave SEO (Metadatos)</label>
+                        <input type="text" name="keywords" placeholder="ej. seo, marketing, diseño">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">CRUSH IT!</button>
+                </form>
+
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
+
+                <h2>Resultados (Outputs)</h2>
+                <div class="file-list">
+                    {% if output_files %}
+                        {% for file in output_files %}
+                            <div class="file-item">
+                                <span style="cursor: pointer; color: var(--primary);" onclick="showPreview('{{ file }}')">{{ file }}</span>
+                                <a href="/download/{{ file }}" class="download-link">Descargar</a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: #555; padding: 20px;">Sin resultados</p>
+                    {% endif %}
+                </div>
+
+                <form action="/clear" method="post">
+                    <input type="hidden" name="target" value="outputs">
+                    <button type="submit" class="btn btn-outline">Vaciado de Salidas</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- NEW PREVIEW CARD -->
+        <div class="card preview-card" id="inline-preview-card">
+            <h2>Vista Previa del Resultado</h2>
+            <div class="preview-container">
+                <p id="inline-preview-name" style="color: var(--primary); font-weight: 600; margin-bottom: 10px;"></p>
+                <img id="inline-preview-img" src="" alt="Preview">
+            </div>
+        </div>
+
+        <footer>
+            Pixel Crusher Engine v1.0.0 | Developed by <strong>elals</strong>
+        </footer>
+
+        <!-- PREVIEW MODAL -->
+        <div id="preview-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column;">
+            <img id="preview-img" src="" style="max-width: 90%; max-height: 80%; border-radius: 10px; box-shadow: 0 0 50px rgba(0,242,254,0.3);">
+            <p id="preview-name" style="margin-top: 20px; color: var(--primary); font-weight: 600;"></p>
+            <button onclick="closePreview()" class="btn btn-outline" style="width: auto; padding: 10px 40px; margin-top: 20px;">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // Lógica de Drag & Drop
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const dropText = document.getElementById('drop-text');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.style.borderColor = 'var(--primary)';
+            dropZone.style.background = 'rgba(0, 242, 254, 0.1)';
+            dropText.innerText = "¡Suéltalo!";
+        }
+
+        function unhighlight(e) {
+            dropZone.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            dropZone.style.background = 'transparent';
+            dropText.innerText = "Arrastra imágenes aquí o haz clic para buscar";
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            
+            if (files.length > 0) {
+                const formData = new FormData();
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
+                }
+
+                dropText.innerText = "Subiendo...";
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        const errorText = await response.text();
+                        alert("Error al subir archivos: " + errorText);
+                        unhighlight();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Error de conexión");
+                    unhighlight();
+                });
+            }
+        }
+
+        // Lógica de Preview
+        function showPreview(filename) {
+            const inlineCard = document.getElementById('inline-preview-card');
+            const inlineImg = document.getElementById('inline-preview-img');
+            const inlineName = document.getElementById('inline-preview-name');
+            
+            inlineImg.src = "/preview/" + filename;
+            inlineName.innerText = filename;
+            inlineCard.style.display = 'block';
+            
+            // Scroll suave hacia el preview
+            inlineCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').style.display = 'none';
+        }
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape") closePreview();
+        });
+    </script>
+</body>
+</html>

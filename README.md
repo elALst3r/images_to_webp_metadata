@@ -1,65 +1,45 @@
-# Python Image Converter to WEBP + Metadata Manager
+# Pixel Crusher
 
-Script en Python para convertir archivos de imagen desde múltiples formatos a **WEBP**, formato moderno desarrollado por Google para compresión y optimización de imágenes web.
-
-Además de convertir las imágenes, el script permite agregar **metadatos personalizados** a la imagen generada para mejorar el control, organización y trazabilidad de los activos digitales.
+**Pixel Crusher** es una potente herramienta híbrida (Web & CLI) diseñada para optimizar imágenes. Convierte tus activos a formato **WebP**, ajusta el tamaño y añade metadatos EXIF estratégicos para mejorar el rendimiento web.
 
 ## Características
+- **Conversión Inteligente:** Transforma JPG/PNG a WebP de alto rendimiento.
+- **SEO Ready:** Inyección automática de metadatos SEO (`ImageDescription`).
+- **Híbrido:** Úsalo desde tu navegador o desde la terminal.
+- **Premium UI:** Interfaz moderna con modo oscuro y efectos de cristal.
+- **Batch Processing:** Procesa cientos de imágenes con un solo clic.
 
-- Conversión de imágenes a formato `.webp`
-- Compatible con múltiples formatos de entrada:
-  - JPG / JPEG
-  - PNG
-  - BMP
-  - TIFF
-  - GIF
-- Compresión optimizada para web
-- Reducción de peso de archivos
-- Inserción de metadatos personalizados
-- Procesamiento individual o masivo
-- Preparado para flujos SEO, eCommerce y performance web
+## Instalación rápida
+1. Clona este repositorio.
+2. Configura el entorno ejecutando el script de instalación:
+   ```bash
+   ./setup_env.sh
+   ```
+3. Activa el entorno:
+   ```bash
+   source venv/bin/activate
+   ```
 
-## Objetivo
-
-Optimizar imágenes para mejorar:
-
-- Velocidad de carga
-- Performance web
-- Core Web Vitals
-- SEO técnico
-- Organización de assets digitales
-- Control interno de imágenes generadas
-
-## Tecnologías
-
-- Python 3
-- Pillow
-- pathlib
-- os
-- datetime
-
-## Casos de uso
-
-- Optimización de imágenes para sitios web
-- Conversión masiva de imágenes para eCommerce
-- Preparación de imágenes para landing pages
-- Automatización de assets digitales
-- Mejora de rendimiento web
-- Control de versiones de imágenes generadas
-
-## Estructura sugerida
-
+## Uso
+### Dashboard Web
 ```bash
-project/
-├── input/
-│   ├── imagen-1.jpg
-│   ├── banner.png
-│   └── producto.tiff
-│
-├── output/
-│   ├── imagen-1.webp
-│   ├── banner.webp
-│   └── producto.webp
-│
-├── converter.py
-└── README.md
+python app.py
+```
+Accede a `http://127.0.0.1:5005`
+
+### Terminal (CLI)
+```bash
+python cli_crusher.py --all --quality 80 --scale 50
+```
+
+## Requisitos
+- Python 3.8+
+- Pillow
+- Flask
+- piexif
+
+## Licencia
+Este proyecto está bajo la Licencia MIT - mira el archivo [LICENSE](LICENSE) para detalles.
+
+---
+Desarrollado para optimización de alto rendimiento.
